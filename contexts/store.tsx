@@ -1,9 +1,17 @@
 import React, { useContext, useReducer } from 'react';
 import { Action, reducer } from './reducer';
 import { User } from '@supabase/supabase-js';
+import { Database } from '~/types/schema.ts';
 
 export interface StateContext {
   user: User | null;
+  profile: Database.public.tables.profiles.Row | null;
+  snacks: Array<{
+    id: string;
+    text: string;
+    type: 'INFO' | 'ERROR';
+    timeout?: number;
+  }>;
 }
 
 export interface Store {
@@ -12,7 +20,9 @@ export interface Store {
 }
 
 const initialState: StateContext = {
-  user: null
+  user: null,
+  profile: null,
+  snacks: []
 };
 
 const defaultState: StateContext = initialState;

@@ -3,18 +3,22 @@ import {
   Alert,
   SafeAreaView,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   View,
-  Text,
-  Button
+  Text
 } from 'react-native';
-import { supabase } from '~/lib/supabase';
+import { supabase } from '~/db/supabase';
 import ROUTES from '~/router/routes';
 import { ActionType } from '~/contexts/reducer';
 import { useStateContext } from '~/contexts/store';
+import StyledTextInput from '~/components/StyledTextInput.tsx';
+import StyledButton from '~/components/StyledButton.tsx';
+import useTheme from '~/hooks/useTheme.ts';
 
 export default function ResetPassword({ navigation }: any) {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
+
   const { state, dispatch } = useStateContext();
 
   const [loading, setLoading] = useState(false);
@@ -38,15 +42,18 @@ export default function ResetPassword({ navigation }: any) {
       password: password
     });
 
-    if (error) Alert.alert(error.message);
-
-    dispatch({ type: ActionType.SET_USER, payload: data.user });
-
     setLoading(false);
+
+    if (error) {
+      dispatch({ type: ActionType.ADD_SNACK, payload: { text: error.message, type: 'ERROR' }})
+    }else{
+      dispatch({ type: ActionType.SET_USER, payload: data.user });
+    }
+
   }
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.page}>
       <View style={styles.container}>
         <View>
           <Text style={styles.title}>Create new password</Text>
@@ -57,36 +64,31 @@ export default function ResetPassword({ navigation }: any) {
           </Text>
         </View>
 
-        <View style={[styles.inputContainer, { marginTop: 10 }]}>
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            onChangeText={(text) => setPassword(text)}
-            value={password}
-            secureTextEntry={true}
-            placeholderTextColor={'#8391A1'}
-          />
-        </View>
-        <View style={[styles.inputContainer, { marginTop: 10 }]}>
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm password"
-            onChangeText={(text) => setConfirmPassword(text)}
-            value={confirmPassword}
-            secureTextEntry={true}
-            placeholderTextColor={'#8391A1'}
-          />
-        </View>
+        <StyledTextInput
+          containerStyles={{ marginTop: 10 }}
+          placeholder="Password"
+          onChangeText={(text) => setPassword(text)}
+          value={password}
+          secureTextEntry={true}
+        />
+        <StyledTextInput
+          containerStyles={{ marginTop: 10 }}
+          placeholder="Confirm password"
+          onChangeText={(text) => setConfirmPassword(text)}
+          value={confirmPassword}
+          secureTextEntry={true}
+        />
         <View>
           <Text style={styles.error}>
             {error ? '*' : ''}
             {error}
           </Text>
         </View>
-        <View style={styles.changePasswordBtn}>
-          <Button title={'Change Password'} color={'white'} onPress={reset} />
-        </View>
-
+        <StyledButton
+          containerStyles={{ marginTop: 30 }}
+          title="Change Password"
+          onPress={reset}
+        />
         <View style={styles.bottomLinkContainer}>
           <TouchableOpacity
             onPress={() => {
@@ -101,62 +103,43 @@ export default function ResetPassword({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 14,
-    height: '100%'
-  },
-  inputContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 56,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    borderColor: '#eeeeee',
-    borderWidth: 1
-  },
-  error: {
-    color: 'red',
-    textAlign: 'right'
-  },
-  input: {
-    height: 56,
-    paddingHorizontal: 16,
-    width: '80%'
-  },
-  title: {
-    marginTop: 20,
-    fontSize: 28,
-    fontWeight: 'bold',
-    paddingRight: 20
-  },
-  subtitle: {
-    marginTop: 10,
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '500',
-    color: '#6A707C'
-  },
-  changePasswordBtn: {
-    borderColor: 'black',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingVertical: 5,
-    backgroundColor: 'black',
-    marginTop: 30
-  },
-  bottomLinkContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginTop: 'auto',
-    justifyContent: 'center'
-  },
-  bottomLink: {
-    color: '#35C2C1',
-    marginLeft: 5,
-    fontWeight: 'bold'
-  }
-});
+const createStyles = (theme) =>
+  StyleSheet.create({
+    page: {
+      backgroundColor: theme.background
+    },
+    container: {
+      paddingHorizontal: 14,
+      height: '100%'
+    },
+    error: {
+      color: theme.error,
+      textAlign: 'right'
+    },
+    title: {
+      marginTop: 20,
+      fontSize: 28,
+      fontWeight: 'bold',
+      paddingRight: 20,
+      color: theme.title
+    },
+    subtitle: {
+      marginTop: 10,
+      fontSize: 16,
+      lineHeight: 24,
+      fontWeight: '500',
+      color: theme.subtitle
+    },
+    bottomLinkContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      marginTop: 'auto',
+      justifyContent: 'center'
+    },
+    bottomLink: {
+      color: theme.primary,
+      marginLeft: 5,
+      fontWeight: 'bold'
+    }
+  });

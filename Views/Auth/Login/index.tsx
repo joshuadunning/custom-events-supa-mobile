@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { supabase } from '~/lib/supabase';
+import { supabase } from '~/db/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
 import ROUTES from '~/router/routes';
 // @ts-ignore
@@ -24,11 +24,13 @@ import { useStateContext } from '~/contexts/store';
 import { ActionType } from '~/contexts/reducer';
 import { Theme } from '~/types/theme';
 import useTheme from '~/hooks/useTheme';
+import StyledTextInput from '~/components/StyledTextInput.tsx';
+import StyledButton from '~/components/StyledButton.tsx';
 
 export default function Login({ navigation }: any) {
   const { state, dispatch } = useStateContext();
-
-  const styles = createStyles(useTheme().theme);
+  const theme = useTheme().theme;
+  const styles = createStyles(theme);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -68,7 +70,7 @@ export default function Login({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.page}>
       <View style={styles.container}>
         <Back route={ROUTES.LANDING} navigation={navigation} />
 
@@ -77,48 +79,44 @@ export default function Login({ navigation }: any) {
             Welcome back! Glad to see you again!
           </Text>
         </View>
-
-        <View style={[styles.mt20, styles.inputContainer]}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
-            onChangeText={(text) => setEmail(text)}
-            value={email}
-            placeholderTextColor={'#8391A1'}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete={'email'}
-          />
-        </View>
-        <View style={[styles.inputContainer, { marginTop: 10 }]}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            onChangeText={(text) => setPassword(text)}
-            value={password}
-            secureTextEntry={hidePassword}
-            placeholderTextColor={'#8391A1'}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete={'password'}
-          />
+        <StyledTextInput
+          containerStyles={{ marginTop: 20 }}
+          placeholder="Enter your email"
+          onChangeText={(text) => setEmail(text)}
+          value={email}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete={'email'}
+        />
+        <StyledTextInput
+          containerStyles={{ marginTop: 10 }}
+          placeholder="Enter your password"
+          onChangeText={(text) => setPassword(text)}
+          value={password}
+          secureTextEntry={hidePassword}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete={'password'}
+        >
           <MaterialIcons
             onPress={() => setHidePassword(!hidePassword)}
             style={styles.visibilityIcon}
             name={'visibility'}
-            color={'#1E232C'}
+            color={theme.subtitle}
             size={20}
           />
-        </View>
+        </StyledTextInput>
         <TouchableOpacity
           onPress={() => navigation.navigate(ROUTES.REQUEST_RESET_PASSWORD)}
           style={[styles.forgotPassword]}
         >
-          <Text>Forgot Password?</Text>
+          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
-        <View style={styles.loginBtn}>
-          <Button title={'Login'} color={'white'} onPress={signInWithEmail} />
-        </View>
+        <StyledButton
+          containerStyles={{ marginTop: 30 }}
+          title={'Login'}
+          onPress={signInWithEmail}
+        />
         <View
           style={{
             display: 'flex',
@@ -141,7 +139,7 @@ export default function Login({ navigation }: any) {
             <Image style={styles.socialIcon} source={Google}></Image>
           </TouchableOpacity>
           <View style={styles.socialBtn}>
-            <Image style={styles.socialIcon} source={Apple}></Image>
+            <Image style={styles.socialIcon} colo source={Apple}></Image>
           </View>
         </View>
         <View style={styles.noAccountContainer}>
@@ -161,25 +159,12 @@ export default function Login({ navigation }: any) {
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
+    page: {
+      backgroundColor: theme.background
+    },
     container: {
       paddingHorizontal: 14,
       height: '100%'
-    },
-    inputContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      height: 56,
-      backgroundColor: '#f5f5f5',
-      borderRadius: 8,
-      borderColor: '#eeeeee',
-      borderWidth: 1
-    },
-    input: {
-      height: 56,
-      paddingHorizontal: 16,
-      width: '80%'
     },
     visibilityIcon: {
       paddingRight: 16
@@ -197,30 +182,25 @@ const createStyles = (theme: Theme) =>
       marginTop: 20,
       fontSize: 28,
       fontWeight: 'bold',
+      color: theme.title,
       paddingRight: 20
     },
     forgotPassword: {
       alignSelf: 'flex-end',
-      color: '#6A707C',
       marginTop: 20
     },
-    loginBtn: {
-      borderColor: 'black',
-      borderWidth: 1,
-      borderRadius: 10,
-      paddingVertical: 5,
-      backgroundColor: 'black',
-      marginTop: 30
+    forgotPasswordText: {
+      color: theme.subtitle
     },
     orLoginWith: {
       marginTop: 20,
       marginBottom: 20,
-      color: '#6A707C',
+      color: theme.subtitle,
       paddingHorizontal: 10
     },
     hdiv: {
       flex: 1,
-      borderBottomColor: '#dcdcdc',
+      borderBottomColor: theme.subtitle,
       borderBottomWidth: 1
     },
     socialContainer: {
@@ -232,7 +212,8 @@ const createStyles = (theme: Theme) =>
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 1,
-      borderColor: '#dcdcdc',
+      borderColor: theme.backgroundOffsetBorder,
+      backgroundColor: 'white',
       borderRadius: 10,
       paddingVertical: 15
     },
@@ -247,9 +228,11 @@ const createStyles = (theme: Theme) =>
       marginTop: 'auto',
       justifyContent: 'center'
     },
-    noAccount: {},
+    noAccount: {
+      color: theme.subtitle
+    },
     register: {
-      color: theme.accent1,
+      color: theme.primary,
       marginLeft: 5,
       fontWeight: 'bold'
     }

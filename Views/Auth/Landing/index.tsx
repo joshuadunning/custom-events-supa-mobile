@@ -15,6 +15,7 @@ import ELogo from '~/assets/images/auth/elogo.png';
 import ROUTES from '~/router/routes';
 import useTheme from '~/hooks/useTheme';
 import { Theme } from '~/types/theme';
+import StyledButton from '~/components/StyledButton.tsx';
 
 export default function Landing({ navigation }: any) {
   const styles = createStyles(useTheme());
@@ -27,24 +28,15 @@ export default function Landing({ navigation }: any) {
           <Text style={styles.appTitle}>Event App</Text>
         </View>
         <View style={styles.btnContainer}>
-          <View style={styles.loginBtn}>
-            <Button
-              title={'Login'}
-              color={'white'}
-              onPress={() => {
-                navigation.navigate(ROUTES.LOGIN);
-              }}
-            />
-          </View>
-          <View style={styles.signupBtn}>
-            <Button
-              title={'Register'}
-              color={'black'}
-              onPress={() => {
-                navigation.navigate(ROUTES.SIGNUP);
-              }}
-            />
-          </View>
+          <StyledButton
+            title={'Login'}
+            onPress={() => navigation.navigate(ROUTES.LOGIN)}
+          />
+          <StyledButton
+            title={'Register'}
+            outlined={true}
+            onPress={() => navigation.navigate(ROUTES.SIGNUP)}
+          />
         </View>
       </View>
     </ImageBackground>
@@ -54,10 +46,12 @@ export default function Landing({ navigation }: any) {
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     lowerThird: {
+      backgroundColor: theme.background,
       position: 'absolute',
       bottom: 0,
       width: '100%',
-      height: '50%'
+      height: '50%',
+      alignItems: 'center'
     },
     appHeader: {
       display: 'flex',
@@ -71,25 +65,7 @@ const createStyles = (theme: Theme) =>
       resizeMode: 'cover'
     },
     btnContainer: {
-      display: 'flex',
-      alignItems: 'center',
+      width: '90%',
       marginTop: 40
-    },
-    loginBtn: {
-      width: '90%',
-      borderColor: 'black',
-      borderWidth: 1,
-      borderRadius: 10,
-      paddingVertical: 5,
-      backgroundColor: 'black'
-    },
-    signupBtn: {
-      width: '90%',
-      borderColor: 'black',
-      borderWidth: 1,
-      borderRadius: 10,
-      paddingVertical: 5,
-      backgroundColor: 'white',
-      marginTop: 10
     }
   });

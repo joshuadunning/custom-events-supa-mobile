@@ -3,19 +3,26 @@ import {
   Alert,
   SafeAreaView,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   View,
   Text,
-  Button,
-  Image
 } from 'react-native';
-import { supabase } from '~/lib/supabase';
-import { MaterialIcons } from '@expo/vector-icons';
+import { supabase } from '~/db/supabase';
 import ROUTES from '~/router/routes';
 import Back from '~/Views/Auth/components/Back';
+import StyledTextInput from '~/components/StyledTextInput.tsx';
+import StyledButton from '~/components/StyledButton.tsx';
+import useTheme from '~/hooks/useTheme.ts';
+import { useStateContext } from "~/contexts/store.tsx";
+import { ActionType } from "~/contexts/reducer.ts";
 
 export default function RequestResetPassword({ navigation }: any) {
+
+  const {dispatch} = useStateContext();
+
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
+
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -23,15 +30,19 @@ export default function RequestResetPassword({ navigation }: any) {
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email);
 
-    if (error) Alert.alert(error.message);
-
     setLoading(false);
 
-    navigation.navigate(ROUTES.OTP, { email: email });
+    if (error) {
+      dispatch({type: ActionType.ADD_SNACK, payload: {text: error.message, type: "ERROR"}});
+    }else{
+      navigation.navigate(ROUTES.OTP, { email: email });
+    }
+
+
   }
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.page}>
       <View style={styles.container}>
         <Back navigation={navigation} />
 
@@ -45,25 +56,21 @@ export default function RequestResetPassword({ navigation }: any) {
           </Text>
         </View>
 
-        <View style={[styles.mt20, styles.inputContainer]}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
-            onChangeText={(text) => setEmail(text)}
-            value={email}
-            placeholderTextColor={'#8391A1'}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete={'email'}
-          />
-        </View>
-        <View style={styles.sendCodeBtn}>
-          <Button
-            title={'Send Code'}
-            color={'white'}
-            onPress={resetPasswordRequest}
-          />
-        </View>
+        <StyledTextInput
+          containerStyles={styles.mt20}
+          placeholder="Enter your email"
+          onChangeText={(text) => setEmail(text)}
+          value={email}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete={'email'}
+        />
+        <StyledButton
+          containerStyles={{ marginTop: 30 }}
+          title={'Send Code'}
+          onPress={resetPasswordRequest}
+          loading={loading}
+        />
 
         <View style={styles.bottomLinkContainer}>
           <Text style={styles.bottomLinkText}>Remember Password?</Text>
@@ -80,62 +87,45 @@ export default function RequestResetPassword({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 14,
-    height: '100%'
-  },
-  inputContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 56,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    borderColor: '#eeeeee',
-    borderWidth: 1
-  },
-  input: {
-    height: 56,
-    paddingHorizontal: 16,
-    width: '80%'
-  },
-  mt20: {
-    marginTop: 20
-  },
-  title: {
-    marginTop: 20,
-    fontSize: 28,
-    fontWeight: 'bold',
-    paddingRight: 20
-  },
-  subtitle: {
-    marginTop: 10,
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '500',
-    color: '#6A707C'
-  },
-  sendCodeBtn: {
-    borderColor: 'black',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingVertical: 5,
-    backgroundColor: 'black',
-    marginTop: 30
-  },
-  bottomLinkContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginTop: 'auto',
-    justifyContent: 'center'
-  },
-  bottomLinkText: {},
-  bottomLink: {
-    color: '#35C2C1',
-    marginLeft: 5,
-    fontWeight: 'bold'
-  }
-});
+const createStyles = (theme) =>
+  StyleSheet.create({
+    page: {
+      backgroundColor: theme.background
+    },
+    container: {
+      paddingHorizontal: 14,
+      height: '100%'
+    },
+    mt20: {
+      marginTop: 20
+    },
+    title: {
+      marginTop: 20,
+      fontSize: 28,
+      fontWeight: 'bold',
+      paddingRight: 20,
+      color: theme.title
+    },
+    subtitle: {
+      marginTop: 10,
+      fontSize: 16,
+      lineHeight: 24,
+      fontWeight: '500',
+      color: theme.subtitle
+    },
+    bottomLinkContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      marginTop: 'auto',
+      justifyContent: 'center'
+    },
+    bottomLinkText: {
+      color: theme.subtitle
+    },
+    bottomLink: {
+      color: theme.primary,
+      marginLeft: 5,
+      fontWeight: 'bold'
+    }
+  });

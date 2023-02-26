@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Dashboard from '../Views/Dashboard';
 import Event from '../Views/Event';
 import ROUTES from './routes';
 import Login from '../Views/Auth/Login';
-import { supabase } from '../lib/supabase';
+import { supabase } from '~/db/supabase';
 import Landing from '~/Views/Auth/Landing';
 import Signup from '~/Views/Auth/Signup';
 import RequestResetPassword from '~/Views/Auth/RequestResetPassword';
@@ -15,25 +15,55 @@ import { useStateContext } from '~/contexts/store';
 import { ActionType } from '~/contexts/reducer';
 import ResetPassword from '~/Views/Auth/ResetPassword';
 import { registerForPushNotificationsAsync } from '~/helpers';
+import Logger from '~/helpers/Logger.ts';
+import EditAccount from '~/Views/Auth/EditAccount/index.tsx';
+import { get_profile } from '~/db/index.ts';
+
+const log = new Logger('Navigation.tsx');
 
 export const Navigation = () => {
   const { state, dispatch } = useStateContext();
 
   // On logout, make sure to clear the user from the state
   useEffect(() => {
-    supabase.auth.onAuthStateChange((_event, session) => {
-      if (_event === 'SIGNED_OUT') {
-        dispatch({ type: ActionType.SET_USER, payload: null });
-      }
-      if (_event === 'SIGNED_IN') {
-        registerForPushNotificationsAsync().then((token) => {
-          supabase.auth.updateUser({
-            pushToken: token
-          });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session && data.session.user) {
+        dispatch({ type: ActionType.SET_USER, payload: data.session.user });
+        updatePushToken(data.session.user.id);
+        get_profile(data.session.user.id).then((profile) => {
+          dispatch({ type: ActionType.SET_PROFILE, payload: profile });
         });
       }
     });
+
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (_event === 'SIGNED_OUT') {
+        dispatch({ type: ActionType.SET_USER, payload: null });
+        dispatch({ type: ActionType.SET_PROFILE, payload: null });
+      }
+      if (_event === 'SIGNED_IN' && session) {
+        updatePushToken(session.user.id);
+        get_profile(session.user.id).then((profile) => {
+          dispatch({ type: ActionType.SET_PROFILE, payload: profile });
+        });
+      }
+    });
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
   }, []);
+
+  const updatePushToken = async (id: string) => {
+    const token = await registerForPushNotificationsAsync();
+
+    const res = await supabase
+      .from('profiles')
+      .update({ push_token: token })
+      .eq('id', id);
+
+    res.error && log.error(res.error);
+  };
 
   return (
     <NavigationContainer>
@@ -55,6 +85,11 @@ function AppNavigator() {
       <Stack.Screen
         name={ROUTES.EVENT}
         component={Event}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name={ROUTES.EDITACCOUNT}
+        component={EditAccount}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

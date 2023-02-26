@@ -1,24 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Alert,
-  SafeAreaView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-  Text,
-  Button,
-  Image,
-  KeyboardAvoidingView
-} from 'react-native';
-import { supabase } from '~/lib/supabase';
-import { MaterialIcons } from '@expo/vector-icons';
-import ROUTES from '~/router/routes';
-import Back from '~/Views/Auth/components/Back';
-import { EmailOtpType } from '@supabase/gotrue-js/src/lib/types';
-import OTPInput from '~/Views/Auth/components/OTPInput';
+import React, { useEffect, useState } from "react";
+import { Alert, KeyboardAvoidingView, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { supabase } from "~/db/supabase";
+import ROUTES from "~/router/routes";
+import Back from "~/Views/Auth/components/Back";
+import OTPInput from "~/Views/Auth/components/OTPInput";
+import useTheme from "~/hooks/useTheme.ts";
+import { useStateContext } from "~/contexts/store.tsx";
+import { ActionType } from "~/contexts/reducer.ts";
 
 export default function OTP({ navigation, route }: any) {
+
+  const {dispatch} = useStateContext();
+
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
+
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState<string>('');
 
@@ -32,6 +28,8 @@ export default function OTP({ navigation, route }: any) {
       route.params.email
     );
 
+    console.log("RESEND OTP")
+
     if (error) Alert.alert(error.message);
     setLoading(false);
   }
@@ -44,15 +42,19 @@ export default function OTP({ navigation, route }: any) {
       type: 'recovery'
     });
 
-    if (error) Alert.alert(error.message);
-
     setLoading(false);
 
-    navigation.navigate(ROUTES.RESET_PASSWORD, { email: route.params.email });
+    if (error) {
+      dispatch({type: ActionType.ADD_SNACK, payload: {text: error.message, type: "ERROR"}});
+      setOtp(()=>'')
+      return
+    }else{
+      navigation.navigate(ROUTES.RESET_PASSWORD, { email: route.params.email });
+    }
   }
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.page}>
       <KeyboardAvoidingView behavior={'padding'}>
         <View style={styles.container}>
           <Back navigation={navigation} />
@@ -79,37 +81,44 @@ export default function OTP({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 14,
-    height: '100%'
-  },
-  title: {
-    marginTop: 20,
-    fontSize: 40,
-    fontWeight: 'bold',
-    paddingRight: 20
-  },
-  subtitle: {
-    marginTop: 14,
-    fontSize: 24,
-    lineHeight: 30,
-    fontWeight: '400',
-    color: '#6A707C',
-    marginBottom: 30
-  },
-  bottomLinkContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginTop: 'auto',
-    justifyContent: 'center',
-    marginBottom: 20
-  },
-  bottomLinkText: {},
-  bottomLink: {
-    color: '#35C2C1',
-    marginLeft: 5,
-    fontWeight: 'bold'
-  }
-});
+const createStyles = (theme) =>
+  StyleSheet.create({
+    page: {
+      backgroundColor: theme.background
+    },
+    container: {
+      paddingHorizontal: 14,
+      height: '100%'
+    },
+    title: {
+      marginTop: 20,
+      fontSize: 40,
+      fontWeight: 'bold',
+      paddingRight: 20,
+      color: theme.title
+    },
+    subtitle: {
+      marginTop: 14,
+      fontSize: 24,
+      lineHeight: 30,
+      fontWeight: '400',
+      color: theme.subtitle,
+      marginBottom: 30
+    },
+    bottomLinkContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      marginTop: 'auto',
+      justifyContent: 'center',
+      marginBottom: 20
+    },
+    bottomLinkText: {
+      color: theme.subtitle
+    },
+    bottomLink: {
+      color: theme.primary,
+      marginLeft: 5,
+      fontWeight: 'bold'
+    }
+  });

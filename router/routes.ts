@@ -7,7 +7,9 @@ const ROUTES = {
   LANDING: 'Landing',
   RESET_PASSWORD: 'ResetPassword',
   REQUEST_RESET_PASSWORD: 'RequestResetPassword',
-  OTP: 'OTP'
+  OTP: 'OTP',
+  APPINFO: 'AppInfo',
+  EDITACCOUNT: 'EditAccount'
 } as const;
 
 export default ROUTES;

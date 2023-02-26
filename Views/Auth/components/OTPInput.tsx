@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity
 } from 'react-native';
+import useTheme from '~/hooks/useTheme.ts';
 
 interface Props {
   code: string;
@@ -15,6 +16,9 @@ interface Props {
 }
 
 export default function OTPInput({ size, code, setCode }: Props) {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
+
   const [numbers, setNumbers] = useState(Array(size).fill(''));
   const hiddenInput = React.useRef<TextInput>(null);
 
@@ -69,33 +73,35 @@ export default function OTPInput({ size, code, setCode }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-evenly'
-  },
-  numberContainer: {
-    borderColor: '#eeeeee',
-    borderWidth: 1,
-    borderRadius: 8,
-    height: 80,
-    width: 50,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  numberContainerEmpty: {
-    borderColor: '#eeeeee',
-    backgroundColor: '#E8ECF4'
-  },
-  numberContainerFilled: {
-    borderColor: '#35C2C1'
-  },
-  number: {
-    fontSize: 28
-  },
-  hidden: {
-    display: 'none'
-  }
-});
+const createStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-evenly'
+    },
+    numberContainer: {
+      borderColor: theme.backgroundOffsetBorder,
+      borderWidth: 1,
+      borderRadius: 8,
+      height: 80,
+      width: 50,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    numberContainerEmpty: {
+      borderColor: theme.backgroundOffsetBorder,
+      backgroundColor: theme.backgroundOffset
+    },
+    numberContainerFilled: {
+      borderColor: theme.primary
+    },
+    number: {
+      fontSize: 28,
+      color: theme.title
+    },
+    hidden: {
+      display: 'none'
+    }
+  });

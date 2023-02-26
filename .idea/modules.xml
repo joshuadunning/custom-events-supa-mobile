@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/custom-events-supa-mobile.iml" filepath="$PROJECT_DIR$/.idea/custom-events-supa-mobile.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/supa-mobile-starter.iml" filepath="$PROJECT_DIR$/.idea/supa-mobile-starter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../supabase-starter/supabase-starter.iml" filepath="$PROJECT_DIR$/../supabase-starter/supabase-starter.iml" />
     </modules>
   </component>
 </project>
